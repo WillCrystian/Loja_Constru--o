@@ -1,15 +1,17 @@
 from http.client import HTTPResponse
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from rolepermissions.decorators import has_permission_decorator
 from .models import Users
 from django.urls import reverse
-from django.contrib import auth
+from django.contrib import auth, messages
+
 
 
 @has_permission_decorator('cadastrar_vendedor')
 def cadastrar_vendedor(request):
     if request.method == 'GET':
-        return render(request, 'cadastrar_vendedor.html',{})
+        vendedores = Users.objects.filter(cargo = 'V')
+        return render(request, 'cadastrar_vendedor.html',{'vendedores': vendedores})
     elif request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -24,8 +26,8 @@ def cadastrar_vendedor(request):
                                          email = email,
                                          password = password,
                                          cargo = "V")
-        # TODO: redirecionar com uma mensagem
-        return HttpResponse('Conta Criada com sucesso')
+        messages.add_message(request, messages.SUCCESS, 'Vendedor cadastrado com sucesso.')
+        return redirect(reverse('cadastrar_vendedor'))
     
 def login(request):
     if request.method == "GET":
@@ -49,7 +51,14 @@ def login(request):
 
 def logout(request):
     request.session.flush()
-    return redirect(reverse('login'))        
+    return redirect(reverse('login'))    
+
+@has_permission_decorator('cadastrar_vendedor')
+def excluir_usuario(request, id):
+    vendedor = get_object_or_404(Users, id= id)
+    vendedor.delete()
+    messages.add_message(request, messages.SUCCESS, 'Vendedor excluido com sucesso.')
+    return redirect(reverse('cadastrar_vendedor'))
             
 
     

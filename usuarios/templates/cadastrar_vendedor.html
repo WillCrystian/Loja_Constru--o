@@ -4,6 +4,13 @@
 
 {% block 'bory' %}
 <div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{message.tags}}">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}
     <form action="{% url 'cadastrar_vendedor' %}" method="POST">{% csrf_token %}
         <div class="form-group">
             <label for="">E-mail</label>
@@ -15,6 +22,37 @@
         </div>
         <button type="submit" class="btn btn-primary">Cadastrar</button>
     </form>
+    <hr class="bg-hr">
+    <table class="table table-striped table-dark">
+        <thead>
+            <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Sobrenome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Último Login</th>
+                <th scope="col">Excluir</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vendedor in vendedores %}
+                <tr>
+                    <th scope="row">{{ vendedor.first_name }}</th>
+                    <td>{{ vendedor.last_name }}</td>
+                    <td>{{ vendedor.email }}</td>
+                    <td>{% if vendedor.last_login %}
+                            {{ vendedor.last_login }}
+                        {% else %}
+                            {{ 'Não foi efetuado login'}}
+                        {% endif %}
+                        
+                        </td>
+                    <td><a href="{% url 'excluir_usuario' vendedor.id %}" class="btn btn-danger">EXCLUIR</a></td>
+                </tr>            
+            {% endfor %}           
+           
+        </tbody>
+    </table>
+    
   
 </div>
 
