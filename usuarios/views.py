@@ -13,19 +13,30 @@ def cadastrar_vendedor(request):
         vendedores = Users.objects.filter(cargo = 'V')
         return render(request, 'cadastrar_vendedor.html',{'vendedores': vendedores})
     elif request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        first_name = request.POST.get('first_name').strip()
+        last_name = request.POST.get('last_name').strip()
+        email = request.POST.get('email').strip()
+        password = request.POST.get('password').strip()
         
-        user = Users.objects.filter(email = email)
+        if len(password) < 6:
+            messages.add_message(request, messages.ERROR, 'Sua senha possui menos de 6 letras.')
+            return redirect(reverse('cadastrar_vendedor'))
+
+        user = Users.objects.filter(email = email) 
+        
+       
         
         if user.exists():
-            # TODO: fazer messagens do django
-            return HttpResponse('Usuário já existe')
+            messages.add_message(request, messages.ERROR, 'Este e-mail já está cadastrado.')
+            return redirect(reverse('cadastrar_vendedor'))
         
         user = Users.objects.create_user(username = email,
+                                         first_name = first_name,
+                                         last_name = last_name,
                                          email = email,
                                          password = password,
                                          cargo = "V")
+        
         messages.add_message(request, messages.SUCCESS, 'Vendedor cadastrado com sucesso.')
         return redirect(reverse('cadastrar_vendedor'))
     
@@ -42,12 +53,12 @@ def login(request):
         user = auth.authenticate(username = email, password = password)
         
         if not user:
-            #TODO: retornar com mensagem 
-            return HttpResponse('Usuário invalido')
+            messages.add_message(request, messages.ERROR, 'Usuário inválido.')
+            return redirect(reverse('login'))
         
         auth.login(request, user)
-        
-        return HttpResponse('Usuário logado com sucesso')
+        messages.add_message(request, messages.SUCCESS, 'Usuário logado com sucesso.')
+        return redirect(reverse('login'))
 
 def logout(request):
     request.session.flush()

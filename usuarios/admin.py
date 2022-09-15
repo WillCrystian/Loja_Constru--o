@@ -11,3 +11,4 @@ class UsersAdmin(admin_auth_django.UserAdmin):
     fieldsets = admin_auth_django.UserAdmin.fieldsets + (
         ('Cargo', {'fields': ('cargo',)}),
     )
+    
